@@ -9,15 +9,173 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-model Sample {
+model User {
+  id               Int               @id @default(autoincrement())
+  email            String            @unique
+  fullname         String
+  password         String
+  profilPicture    String
+  referralCode     String
+  points           Int
+  pointsExpiryDate DateTime?
+  role             Role              @default(USER)
+  isDeleted        Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  Transaction      Transaction[]
+  Event            Event[]
+  Coupon           Coupon[]
+  Review           Review[]
+  Notification     Notification[]
+  referredBy       ReferralHistory?  @relation("ReferredByRelation")
+  referrals        ReferralHistory[] @relation("ReferrerRelation")
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model Event {
+  id                Int             @id @default(autoincrement())
+  userId            Int
+  user              User            @relation(fields: [userId], references: [id])
+  eventCategoriesId Int
+  eventCategory     EventCategories @relation(fields: [eventCategoriesId], references: [id])
+
+  title          String
+  description    String
+  price          Int
+  startDate      DateTime
+  endDate        DateTime
+  avaliableSeats Int
+  location       String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  Transaction    Transaction[]
+  Voucher        Voucher[]
+  Review         Review[]
+
+  @@map("events")
+}
+
+model EventCategories {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Event       Event[]
+
+  @@map("event_categories")
+}
+
+model Transaction {
+  id           Int               @id @default(autoincrement())
+  userId       Int
+  user         User              @relation(fields: [userId], references: [id])
+  eventId      Int
+  event        Event             @relation(fields: [eventId], references: [id])
+  couponId     Int
+  coupon       Coupon?           @relation(fields: [couponId], references: [id])
+  voucherId    Int
+  voucher      Voucher?          @relation(fields: [voucherId], references: [id])
+  status       TransactionStatus
+  paymentProof String
+  pointsUsed   Int
+  totalPrice   Int
+  quantity     Int
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  expiresAt    DateTime
+
+  @@map("transactions")
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELED
+  REFUNDED
+}
+
+model Coupon {
+  id            Int           @id @default(autoincrement())
+  userId        Int
+  user          User          @relation(fields: [userId], references: [id])
+  code          String
+  discountValue Int
+  isUsed        Boolean       @default(false)
+  expiresAt     DateTime
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  Transaction   Transaction[]
+
+  @@map("coupons")
+}
+
+model Voucher {
+  id            Int           @id @default(autoincrement())
+  eventId       Int
+  event         Event         @relation(fields: [eventId], references: [id])
+  code          String
+  discountValue Int
+  startDate     DateTime
+  endDate       DateTime
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  Transaction   Transaction[]
+
+  @@map("vouchers")
+}
+
+model Review {
   id        Int      @id @default(autoincrement())
-  name      String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  eventId   Int
+  event     Event    @relation(fields: [eventId], references: [id])
+  rating    Int
+  comment   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("samples")
+  @@map("reviews")
+}
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  user      User             @relation(fields: [userId], references: [id])
+  type      NotificationType
+  message   String
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  TRANSACTION
+  PROMOTION
+  INFORMATION
+}
+
+model ReferralHistory {
+  id           Int      @id @default(autoincrement())
+  referredById Int      @unique
+  referredBy   User     @relation("ReferredByRelation", fields: [referredById], references: [id])
+  referrerId   Int
+  referrer     User     @relation("ReferrerRelation", fields: [referrerId], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@map("referral_histories")
 }
