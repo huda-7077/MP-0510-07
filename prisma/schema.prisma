@@ -3,31 +3,30 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id               Int               @id @default(autoincrement())
-  email            String            @unique
-  fullname         String
-  password         String
-  profilPicture    String
-  referralCode     String
-  points           Int
-  pointsExpiryDate DateTime?
-  role             Role              @default(USER)
-  isDeleted        Boolean           @default(false)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  transactions     Transaction[]
-  events           Event[]
-  coupons          Coupon[]
-  reviews          Review[]
-  notifications    Notification[]
-  referredBy       ReferralHistory?  @relation("ReferredByRelation")
-  referrals        ReferralHistory[] @relation("ReferrerRelation")
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  fullname      String
+  password      String
+  profilPicture String?
+  referralCode  String         @unique
+  role          Role           @default(USER)
+  inviter       Referral?      @relation("UserInvitee")
+  invitedUsers  Referral[]     @relation("UserInviter")
+  coupons       Coupon[]       @relation("UserCoupons")
+  points        Point[]        @relation("UserPoints")
+  isDeleted     Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  transactions  Transaction[]
+  events        Event[]
+  reviews       Review[]
+  notifications Notification[]
 
   @@map("users")
 }
@@ -35,6 +34,29 @@ model User {
 enum Role {
   ADMIN
   USER
+  ORGANIZER
+}
+
+model Point {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  points    Int
+  expiredAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation("UserPoints", fields: [userId], references: [id])
+
+  @@map("points")
+}
+
+model Referral {
+  id        Int      @id @default(autoincrement())
+  inviterId Int
+  inviteeId Int      @unique
+  createdAt DateTime @default(now())
+  inviter   User     @relation("UserInviter", fields: [inviterId], references: [id])
+  invitee   User     @relation("UserInvitee", fields: [inviteeId], references: [id])
+
+  @@map("referrals")
 }
 
 model Event {
@@ -103,13 +125,13 @@ enum TransactionStatus {
 model Coupon {
   id            Int           @id @default(autoincrement())
   userId        Int
-  user          User          @relation(fields: [userId], references: [id])
-  code          String
+  code          String        @unique
   discountValue Int
   isUsed        Boolean       @default(false)
   expiresAt     DateTime
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  user          User          @relation("UserCoupons", fields: [userId], references: [id])
   transactions  Transaction[]
 
   @@map("coupons")
@@ -160,15 +182,4 @@ enum NotificationType {
   TRANSACTION
   PROMOTION
   INFORMATION
-}
-
-model ReferralHistory {
-  id           Int      @id @default(autoincrement())
-  referredById Int      @unique
-  referredBy   User     @relation("ReferredByRelation", fields: [referredById], references: [id])
-  referrerId   Int
-  referrer     User     @relation("ReferrerRelation", fields: [referrerId], references: [id])
-  createdAt    DateTime @default(now())
-
-  @@map("referral_histories")
 }
