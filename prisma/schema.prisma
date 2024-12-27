@@ -9,24 +9,25 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  email         String         @unique
-  fullname      String
-  password      String
-  profilPicture String?
-  referralCode  String         @unique
-  role          Role           @default(USER)
-  inviter       Referral?      @relation("UserInvitee")
-  invitedUsers  Referral[]     @relation("UserInviter")
-  coupons       Coupon[]       @relation("UserCoupons")
-  points        Point[]        @relation("UserPoints")
-  isDeleted     Boolean        @default(false)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  transactions  Transaction[]
-  events        Event[]
-  reviews       Review[]
-  notifications Notification[]
+  id             Int            @id @default(autoincrement())
+  email          String         @unique
+  fullname       String
+  password       String
+  profilePicture String?
+  referralCode   String         @unique
+  role           Role           @default(USER)
+  inviter        Referral?      @relation("UserInvitee")
+  invitedUsers   Referral[]     @relation("UserInviter")
+  coupons        Coupon[]       @relation("UserCoupons")
+  points         Point[]        @relation("UserPoints")
+  isDeleted      Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  transactions   Transaction[]
+  events         Event[]
+  reviews        Review[]
+  notifications  Notification[]
+  organizers     Organizer?     @relation("Organizers")
 
   @@map("users")
 }
@@ -35,6 +36,23 @@ enum Role {
   ADMIN
   USER
   ORGANIZER
+}
+
+model Organizer {
+  id             Int       @id @default(autoincrement())
+  userId         Int       @unique
+  governmentId   String
+  companyName    String    @unique
+  companyWebsite String
+  companyAddress String
+  companyRole    String
+  details        String    @db.Text()
+  acceptedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  user           User      @relation("Organizers", fields: [userId], references: [id])
+
+  @@map("organizers")
 }
 
 model Point {

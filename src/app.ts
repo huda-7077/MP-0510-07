@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import authRouter from "./routes/auth.router";
+import accountRouter from "./routes/account.router";
 import "./scripts/pointsExpiryScheduler";
 
 const app = express();
@@ -10,6 +11,7 @@ app.use(express.json());
 
 //routes
 app.use("/auth", authRouter);
+app.use("/account", accountRouter);
 
 // middleware error
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
