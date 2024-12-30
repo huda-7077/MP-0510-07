@@ -4,6 +4,7 @@ import authRouter from "./routes/auth.router";
 import accountRouter from "./routes/account.router";
 import "./scripts/pointsExpiryScheduler";
 import eventRouter from "./routes/event.router";
+import eventCategoryRouter from "./routes/event-category.routes";
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use("/auth", authRouter);
 app.use("/account", accountRouter);
 app.use("/events", eventRouter)
+app.use("/event-categories", eventCategoryRouter)
 
 // middleware error
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

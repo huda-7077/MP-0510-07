@@ -85,6 +85,7 @@ model Event {
   eventCategory     EventCategories @relation(fields: [eventCategoriesId], references: [id])
   title             String
   description       String          @db.Text()
+  full_description  String          @db.Text()
   thumbnail         String
   price             Int
   startDate         DateTime
@@ -93,6 +94,7 @@ model Event {
   location          String
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
+  deletedAt         DateTime?
   transactions      Transaction[]
   vouchers          Voucher[]
   reviews           Review[]
@@ -101,11 +103,12 @@ model Event {
 }
 
 model EventCategories {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   title       String
   description String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
   events      Event[]
 
   @@map("event_categories")
