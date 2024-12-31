@@ -50,29 +50,34 @@ export const registerService = async (body: RegisterInput) => {
       },
     });
     if (referrer) {
+      const rewards = await prisma.reward.findFirst();
+
+      const points = rewards?.pointsValue || 10000;
+      const coupons = rewards?.couponsValue || 10000;
+
       await prisma.referral.create({
         data: { inviterId: referrer.id, inviteeId: newUser.id },
       });
 
       const pointsExpiryDate = new Date();
-      pointsExpiryDate.setMinutes(pointsExpiryDate.getMinutes() + 10);
+      pointsExpiryDate.setMonth(pointsExpiryDate.getMonth() + 3);
 
       await prisma.point.create({
         data: {
           userId: referrer.id,
-          points: 10000,
+          points: points,
           expiredAt: pointsExpiryDate,
         },
       });
 
       const couponExpiryDate = new Date();
-      couponExpiryDate.setMinutes(couponExpiryDate.getMinutes() + 10);
+      couponExpiryDate.setMonth(couponExpiryDate.getMonth() + 3);
       const uniqueCouponCode = await generateUniqueCouponCode();
       await prisma.coupon.create({
         data: {
           userId: newUser.id,
           code: uniqueCouponCode,
-          discountValue: 10000,
+          discountValue: coupons,
           expiresAt: couponExpiryDate,
         },
       });

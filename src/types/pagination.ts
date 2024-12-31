@@ -4,7 +4,7 @@ export interface PaginationQueryParams {
   sortBy: string;
   sortOrder: string;
 }
-export interface paginationQueryParams {
+export interface paginationQueriesParams {
   take: number;
   page: number;
   sortBy: string;
