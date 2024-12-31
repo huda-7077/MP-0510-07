@@ -22,4 +22,4 @@ const expirePoints = async () => {
 };
 
 // Atur jadwal untuk menjalankan fungsi expirePoints setiap hari pada pukul 00:00
-scheduleJob("*/1 * * * *", expirePoints);
+scheduleJob("0 0 * * *", expirePoints);
