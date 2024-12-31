@@ -1,5 +1,8 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
+import { createEventService } from "../services/event/create-event.service";
 import { getEventsService } from "../services/event/get-events.service";
+import { getEventService } from "../services/event/get-event.service";
+import { deleteEventService } from "../services/event/delete-event.service";
 
 export const getEventsController = async (
   req: Request,
@@ -8,16 +11,60 @@ export const getEventsController = async (
 ) => {
   try {
     const query = {
-        take: parseInt(req.query.take as string) || 5,
-        page: parseInt(req.query.page as string) || 1,
-        sortBy: (req.query.sortBy as string) || "createdAt",
-        sortOrder: (req.query.sortOrder as string) || "desc",
-        search: (req.query.search as string) || "",
-      };
+      take: parseInt(req.query.take as string) || 10,
+      page: parseInt(req.query.page as string) || 1,
+      sortBy: (req.query.sortBy as string) || "createdAt",
+      sortOrder: (req.query.sortOrder as string) || "desc",
+      search: (req.query.search as string) || "",
+      location: (req.query.location as string) || "",
+    };
     const events = await getEventsService(query);
     res.status(200).json(events);
   } catch (error) {
     next(error);
   }
 };
-
+export const getEventController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = Number(req.params.id);
+    const result = await getEventService(id);
+    res.status(200).send(result);
+  } catch (error) {
+    next(error);
+  }
+};
+export const createEventController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const files = req.files as { [fieldName: string]: Express.Multer.File[] };
+    const result = await createEventService(
+      req.body,
+      files.thumbnail?.[0],
+      res.locals.user.id
+    );
+    res.status(201).send(result);
+  } catch (error) {
+    next(error);
+  }
+};
+export const deleteEventController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = Number(req.params.id);
+    const userId = Number(res.locals.user.id);
+    const result = await deleteEventService(id, userId);
+    res.status(200).send(result);
+  } catch (error) {
+    next(error);
+  }
+};
