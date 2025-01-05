@@ -88,26 +88,25 @@ model Referral {
 }
 
 model Event {
-  id                Int             @id @default(autoincrement())
-  userId            Int
-  user              User            @relation(fields: [userId], references: [id])
-  eventCategoriesId Int
-  eventCategory     EventCategories @relation(fields: [eventCategoriesId], references: [id])
-  title             String
-  description       String          @db.Text()
-  full_description  String          @db.Text()
-  thumbnail         String
-  price             Int
-  startDate         DateTime
-  endDate           DateTime
-  avaliableSeats    Int
-  location          String
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  deletedAt         DateTime?
-  transactions      Transaction[]
-  vouchers          Voucher[]
-  reviews           Review[]
+  id               Int           @id @default(autoincrement())
+  userId           Int
+  user             User          @relation(fields: [userId], references: [id])
+  eventCategory    String
+  title            String
+  description      String        @db.Text()
+  full_description String        @db.Text()
+  thumbnail        String
+  price            Int
+  startDate        DateTime
+  endDate          DateTime
+  avaliableSeats   Int
+  location         String
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  deletedAt        DateTime?
+  transactions     Transaction[]
+  vouchers         Voucher[]
+  reviews          Review[]
 
   @@map("events")
 }
@@ -119,7 +118,6 @@ model EventCategories {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
-  events      Event[]
 
   @@map("event_categories")
 }

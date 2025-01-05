@@ -9,6 +9,7 @@ import rewardsRouter from "./routes/rewards.router";
 import "./scripts/pointsExpiryScheduler";
 
 import eventCategoryRouter from "./routes/event-category.routes";
+import transactionDummyRouter from "./routes/transaction-dummy.router";
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use("/events", eventRouter);
 app.use("/user", userRouter);
 app.use("/rewards", rewardsRouter);
 app.use("/event-categories", eventCategoryRouter);
+app.use("/transaction-dummy", transactionDummyRouter);
 
 // middleware error
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

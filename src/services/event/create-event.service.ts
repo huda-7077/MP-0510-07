@@ -2,7 +2,7 @@ import { cloudinaryUpload } from "../../lib/cloudinary";
 import prisma from "../../lib/prisma";
 
 interface CreateEventBody {
-  eventCategoriesId: string;
+  eventCategory: string;
   title: string;
   description: string;
   full_description: string;
@@ -28,18 +28,13 @@ export const createEventService = async (
       endDate,
       avaliableSeats,
       location,
-      eventCategoriesId,
+      eventCategory,
     } = body;
 
     const numericPrice = parseInt(price, 10);
     const numericSeats = parseInt(avaliableSeats, 10);
-    const numericCategoryId = parseInt(eventCategoriesId, 10);
 
-    if (
-      isNaN(numericPrice) ||
-      isNaN(numericSeats) ||
-      isNaN(numericCategoryId)
-    ) {
+    if (isNaN(numericPrice) || isNaN(numericSeats)) {
       throw new Error("Invalid numeric values provided.");
     }
 
@@ -51,7 +46,7 @@ export const createEventService = async (
     }
 
     const event = await prisma.event.findFirst({
-      where: { title },
+      where: { title, deletedAt: null },
     });
 
     if (event) {
@@ -70,7 +65,7 @@ export const createEventService = async (
         endDate: end,
         avaliableSeats: numericSeats,
         location,
-        eventCategoriesId: numericCategoryId,
+        eventCategory,
         thumbnail: secure_url,
         userId,
       },

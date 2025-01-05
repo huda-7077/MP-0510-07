@@ -4,24 +4,36 @@ import prisma from "../../lib/prisma";
 
 interface GetEventQuery extends PaginationQueryParams {
   search: string;
-  location: string;
 }
 
-export const getEventsService = async (query: GetEventQuery) => {
+export const getEventsByOrganizerIdService = async (
+  userId: number,
+  query: GetEventQuery
+) => {
   try {
-    const { page, sortBy, sortOrder, take, search, location } = query;
+    const user = await prisma.user.findFirst({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error("Invalid user id");
+    }
+
+    if (user.role !== "ORGANIZER") {
+      throw new Error("You are not an organizer");
+    }
+
+    const { page, sortBy, sortOrder, take, search } = query;
 
     const whereClause: Prisma.EventWhereInput = {
+      userId: userId,
       deletedAt: null,
     };
 
     if (search) {
-      whereClause.OR = [{ title: { contains: search, mode: "insensitive" } }];
-    }
-
-    if (location) {
       whereClause.OR = [
-        { location: { contains: location, mode: "insensitive" } },
+        { title: { contains: search, mode: "insensitive" } },
+        { location: { contains: search, mode: "insensitive" } },
       ];
     }
 
