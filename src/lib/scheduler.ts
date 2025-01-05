@@ -32,7 +32,7 @@ const expireTransactions = async () => {
     // You can integrate point rollback here if needed
   }
 
-  console.log(`Expired ${expiredTransactions.length} transactions.`);
+  // console.log(`Expired ${expiredTransactions.length} transactions.`);
 };
 
 // Function to cancel transactions that haven't been confirmed within 3 days
@@ -65,12 +65,14 @@ const cancelUnconfirmedTransactions = async () => {
     // You can integrate point rollback here if needed
   }
 
-  console.log(`Cancelled ${unconfirmedTransactions.length} unconfirmed transactions.`);
+  // console.log(
+  //   `Cancelled ${unconfirmedTransactions.length} unconfirmed transactions.`
+  // );
 };
 
-// Scheduler to run every minute 
-cron.schedule('* * * * *', async () => {
-  console.log("Running scheduled tasks...");
+// Scheduler to run every minute
+cron.schedule("* * * * *", async () => {
+  // console.log("Running scheduled tasks...");
 
   // Call functions to expire and cancel transactions
   await expireTransactions();

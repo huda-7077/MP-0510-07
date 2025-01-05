@@ -49,11 +49,11 @@ export const applyReferralCodeService = async (
       const pointsExpiryDate = new Date();
       pointsExpiryDate.setMonth(pointsExpiryDate.getMonth() + 3);
 
-      await prisma.point.create({
+      await prisma.user.update({
+        where: { id: referrer.id },
         data: {
-          userId: referrer.id,
-          points: points,
-          expiredAt: pointsExpiryDate,
+          totalPoints: points,
+          pointExpiryDate: pointsExpiryDate,
         },
       });
 
