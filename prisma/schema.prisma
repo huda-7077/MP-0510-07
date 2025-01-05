@@ -57,6 +57,16 @@ model Organizer {
   @@map("organizers")
 }
 
+model Reward {
+  id           Int      @id @default(autoincrement())
+  couponsValue Int      @default(10000)
+  pointsValue  Int      @default(10000)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("rewards")
+}
+
 model Point {
   id           Int           @id @default(autoincrement())
   userId       Int
