@@ -18,13 +18,12 @@ model User {
   role            Role           @default(USER)
   inviter         Referral?      @relation("UserInvitee")
   invitedUsers    Referral[]     @relation("UserInviter")
+  totalPoints     Int            @default(0)
+  pointExpiryDate DateTime?
   coupons         Coupon[]       @relation("UserCoupons")
-  points          Point[]        @relation("UserPoints")
   isDeleted       Boolean        @default(false)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
-  totalPoints     Int            @default(0)
-  pointExpiryDate DateTime?
   transactions    Transaction[]
   events          Event[]
   reviews         Review[]
@@ -65,18 +64,6 @@ model Reward {
   updatedAt    DateTime @updatedAt
 
   @@map("rewards")
-}
-
-model Point {
-  id           Int           @id @default(autoincrement())
-  userId       Int
-  points       Int
-  expiredAt    DateTime
-  createdAt    DateTime      @default(now())
-  user         User          @relation("UserPoints", fields: [userId], references: [id])
-  transactions Transaction[]
-
-  @@map("points")
 }
 
 model Referral {
@@ -124,8 +111,6 @@ model Transaction {
   coupon       Coupon?           @relation(fields: [couponId], references: [id])
   voucherId    Int?
   voucher      Voucher?          @relation(fields: [voucherId], references: [id])
-  pointsId     Int?
-  points       Point?            @relation(fields: [pointsId], references: [id])
   status       TransactionStatus
   paymentProof String?
   pointsUsed   Int

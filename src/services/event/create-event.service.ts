@@ -21,8 +21,6 @@ export const createEventService = async (
   try {
     const {
       title,
-      description,
-      full_description,
       price,
       startDate,
       endDate,
@@ -34,10 +32,7 @@ export const createEventService = async (
     const numericPrice = parseInt(price, 10);
     const numericSeats = parseInt(avaliableSeats, 10);
 
-    if (
-      isNaN(numericPrice) ||
-      isNaN(numericSeats) 
-    ) {
+    if (isNaN(numericPrice) || isNaN(numericSeats)) {
       throw new Error("Invalid numeric values provided.");
     }
 
@@ -49,7 +44,7 @@ export const createEventService = async (
     }
 
     const event = await prisma.event.findFirst({
-      where: { title },
+      where: { title, deletedAt: null },
     });
 
     if (event) {
