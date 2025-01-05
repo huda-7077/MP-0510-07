@@ -9,25 +9,27 @@ datasource db {
 }
 
 model User {
-  id             Int            @id @default(autoincrement())
-  email          String         @unique
-  fullname       String
-  password       String
-  profilePicture String?
-  referralCode   String         @unique
-  role           Role           @default(USER)
-  inviter        Referral?      @relation("UserInvitee")
-  invitedUsers   Referral[]     @relation("UserInviter")
-  coupons        Coupon[]       @relation("UserCoupons")
-  points         Point[]        @relation("UserPoints")
-  isDeleted      Boolean        @default(false)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  transactions   Transaction[]
-  events         Event[]
-  reviews        Review[]
-  notifications  Notification[]
-  organizers     Organizer?     @relation("Organizers")
+  id              Int            @id @default(autoincrement())
+  email           String         @unique
+  fullname        String
+  password        String
+  profilePicture  String?
+  referralCode    String         @unique
+  role            Role           @default(USER)
+  inviter         Referral?      @relation("UserInvitee")
+  invitedUsers    Referral[]     @relation("UserInviter")
+  coupons         Coupon[]       @relation("UserCoupons")
+  points          Point[]        @relation("UserPoints")
+  isDeleted       Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  totalPoints     Int            @default(0)
+  pointExpiryDate DateTime?
+  transactions    Transaction[]
+  events          Event[]
+  reviews         Review[]
+  notifications   Notification[]
+  organizers      Organizer?     @relation("Organizers")
 
   @@map("users")
 }
@@ -66,12 +68,13 @@ model Reward {
 }
 
 model Point {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  points    Int
-  expiredAt DateTime
-  createdAt DateTime @default(now())
-  user      User     @relation("UserPoints", fields: [userId], references: [id])
+  id           Int           @id @default(autoincrement())
+  userId       Int
+  points       Int
+  expiredAt    DateTime
+  createdAt    DateTime      @default(now())
+  user         User          @relation("UserPoints", fields: [userId], references: [id])
+  transactions Transaction[]
 
   @@map("points")
 }
@@ -91,7 +94,7 @@ model Event {
   id               Int           @id @default(autoincrement())
   userId           Int
   user             User          @relation(fields: [userId], references: [id])
-  eventCategory    String
+  category         String
   title            String
   description      String        @db.Text()
   full_description String        @db.Text()
@@ -111,17 +114,6 @@ model Event {
   @@map("events")
 }
 
-model EventCategories {
-  id          Int       @id @default(autoincrement())
-  title       String
-  description String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-
-  @@map("event_categories")
-}
-
 model Transaction {
   id           Int               @id @default(autoincrement())
   userId       Int
@@ -132,8 +124,10 @@ model Transaction {
   coupon       Coupon?           @relation(fields: [couponId], references: [id])
   voucherId    Int?
   voucher      Voucher?          @relation(fields: [voucherId], references: [id])
+  pointsId     Int?
+  points       Point?            @relation(fields: [pointsId], references: [id])
   status       TransactionStatus
-  paymentProof String
+  paymentProof String?
   pointsUsed   Int
   totalPrice   Int
   quantity     Int
@@ -145,11 +139,12 @@ model Transaction {
 }
 
 enum TransactionStatus {
-  PENDING
-  SUCCESS
-  FAILED
+  WAITING_FOR_PAYMENT
+  WAITING_FOR_ADMIN_CONFIRMATION
+  DONE
+  REJECTED
+  EXPIRED
   CANCELED
-  REFUNDED
 }
 
 model Coupon {

@@ -2,7 +2,6 @@ import { cloudinaryUpload } from "../../lib/cloudinary";
 import prisma from "../../lib/prisma";
 
 interface CreateEventBody {
-  eventCategory: string;
   title: string;
   description: string;
   full_description: string;
@@ -11,6 +10,7 @@ interface CreateEventBody {
   endDate: string;
   avaliableSeats: string;
   location: string;
+  category: string;
 }
 
 export const createEventService = async (
@@ -21,14 +21,12 @@ export const createEventService = async (
   try {
     const {
       title,
-      description,
-      full_description,
       price,
       startDate,
       endDate,
       avaliableSeats,
       location,
-      eventCategory,
+      category,
     } = body;
 
     const numericPrice = parseInt(price, 10);
@@ -57,15 +55,13 @@ export const createEventService = async (
 
     return await prisma.event.create({
       data: {
-        title,
-        description,
-        full_description,
+        ...body,
         price: numericPrice,
         startDate: start,
         endDate: end,
         avaliableSeats: numericSeats,
         location,
-        eventCategory,
+        category,
         thumbnail: secure_url,
         userId,
       },
