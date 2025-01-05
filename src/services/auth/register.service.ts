@@ -62,11 +62,11 @@ export const registerService = async (body: RegisterInput) => {
       const pointsExpiryDate = new Date();
       pointsExpiryDate.setMonth(pointsExpiryDate.getMonth() + 3);
 
-      await prisma.point.create({
+      await prisma.user.update({
+        where: { id: referrer.id },
         data: {
-          userId: referrer.id,
-          points: points,
-          expiredAt: pointsExpiryDate,
+          totalPoints: referrer.totalPoints + points,
+          pointExpiryDate: pointsExpiryDate,
         },
       });
 

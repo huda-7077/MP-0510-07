@@ -4,16 +4,20 @@ import prisma from "../lib/prisma";
 const expirePoints = async () => {
   const now = new Date();
 
-  const expiredPoints = await prisma.point.findMany({
+  const expiredPoints = await prisma.user.findMany({
     where: {
-      expiredAt: { lte: now },
+      pointExpiryDate: { lte: now },
     },
   });
 
-  for (const point of expiredPoints) {
-    await prisma.point.delete({
+  for (const user of expiredPoints) {
+    await prisma.user.update({
       where: {
-        id: point.id,
+        id: user.id,
+      },
+      data: {
+        totalPoints: 0,
+        pointExpiryDate: null,
       },
     });
   }
@@ -23,3 +27,6 @@ const expirePoints = async () => {
 
 // Atur jadwal untuk menjalankan fungsi expirePoints setiap hari pada pukul 00:00
 scheduleJob("0 0 * * *", expirePoints);
+
+// Jalankan fungsi expirePoints setiap 1 menit
+// scheduleJob("*/1 * * * *", expirePoints);

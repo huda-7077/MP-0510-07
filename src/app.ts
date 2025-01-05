@@ -1,18 +1,16 @@
-import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
-import authRouter from "./routes/auth.router";
+import express, { NextFunction, Request, Response } from "express";
 import accountRouter from "./routes/account.router";
+import authRouter from "./routes/auth.router";
 import eventRouter from "./routes/event.router";
-
-import voucherRouter from "./routes/voucher.router";
-import transactionRouter from "./routes/transaction.router";
-import reviewRouter from "./routes/review.router";
 import "./lib/scheduler";
-import userRouter from "./routes/user.router";
+import reviewRouter from "./routes/review.router";
 import rewardsRouter from "./routes/rewards.router";
+import transactionDummyRouter from "./routes/transaction-dummy.router";
+import transactionRouter from "./routes/transaction.router";
+import userRouter from "./routes/user.router";
+import voucherRouter from "./routes/voucher.router";
 import "./scripts/pointsExpiryScheduler";
-import eventCategoryRouter from "./routes/event-category.routes";
-
 
 const app = express();
 
@@ -28,8 +26,7 @@ app.use("/transactions", transactionRouter);
 app.use("/reviews", reviewRouter);
 app.use("/user", userRouter);
 app.use("/rewards", rewardsRouter);
-app.use("/event-categories", eventCategoryRouter);
-
+app.use("/transaction-dummy", transactionDummyRouter);
 
 // middleware error
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
