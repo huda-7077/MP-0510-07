@@ -16,6 +16,7 @@ export const getEventsController = async (
       sortBy: (req.query.sortBy as string) || "createdAt",
       sortOrder: (req.query.sortOrder as string) || "desc",
       search: (req.query.search as string) || "",
+      category: (req.query.category as string) || "",
       location: (req.query.location as string) || "",
     };
     const events = await getEventsService(query);

@@ -9,7 +9,7 @@ export const validateCreateEvent = [
   body("endDate").notEmpty().withMessage("End date is required"),
   body("avaliableSeats").notEmpty().withMessage("Avaliable seats is required"),
   body("location").notEmpty().withMessage("Location is required"),
-  body("eventCategoriesId").notEmpty().withMessage("Event category is required"),
+  body("category").notEmpty().withMessage("Category is required"),
 
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
