@@ -116,6 +116,7 @@ model Transaction {
   pointsUsed   Int
   totalPrice   Int
   quantity     Int
+  acceptedAt   DateTime?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
   expiresAt    DateTime
