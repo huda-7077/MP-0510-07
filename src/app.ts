@@ -9,6 +9,7 @@ import transactionDummyRouter from "./routes/transaction-dummy.router";
 import transactionRouter from "./routes/transaction.router";
 import userRouter from "./routes/user.router";
 import voucherRouter from "./routes/voucher.router";
+import dashboardOrganizerRouter from "./routes/dashboard-organizer.router";
 import "./scripts/pointsExpiryScheduler";
 import "./lib/scheduler";
 
@@ -27,6 +28,7 @@ app.use("/user", userRouter);
 app.use("/rewards", rewardsRouter);
 app.use("/reviews", reviewRouter);
 app.use("/transaction-dummy", transactionDummyRouter);
+app.use("/dashboard-organizer", dashboardOrganizerRouter);
 
 // middleware error
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
