@@ -1,36 +1,76 @@
-import prisma from "../../lib/prisma";
+import { PrismaClient } from "@prisma/client";
+import { CreateReviewDTO } from "../../dtos/review.dto";
 
-interface CreateReviewBody {
-  userId: number;
-  eventId: number;
-  rating: number;
-  comment: string;
-}
+const prisma = new PrismaClient();
 
-export const createReviewService = async (body: CreateReviewBody) => {
-  try {
-    const { userId, eventId, rating, comment } = body;
+export class CreateReviewService {
+  async execute(data: CreateReviewDTO) {
+    try {
+      // Check if event exists
+      const event = await prisma.event.findUnique({
+        where: { id: data.eventId },
+      });
 
-    // Check if the user has already reviewed this event
-    const existingReview = await prisma.review.findFirst({
-      where: { userId, eventId },
-    });
+      if (!event) {
+        throw new Error("Event not found");
+      }
 
-    if (existingReview) {
-      throw new Error("You have already reviewed this event.");
+      // Check if user exists
+      const user = await prisma.user.findUnique({
+        where: { id: data.userId },
+      });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // Check if user has already reviewed this event
+      const existingReview = await prisma.review.findFirst({
+        where: {
+          userId: data.userId,
+          eventId: data.eventId,
+        },
+      });
+
+      if (existingReview) {
+        throw new Error(`You've already submitted a review for this event.`);
+      }
+
+      // Validate rating
+      if (data.rating < 1 || data.rating > 5) {
+        throw new Error("Rating must be between 1 and 5");
+      }
+
+      // Create review
+      const review = await prisma.review.create({
+        data: {
+          userId: data.userId,
+          eventId: data.eventId,
+          rating: data.rating,
+          comment: data.comment,
+        },
+        include: {
+          user: {
+            select: {
+              fullname: true,
+              profilePicture: true,
+            },
+          },
+          event: {
+            select: {
+              title: true,
+            },
+          },
+        },
+      });
+
+      return {
+        status: "success",
+        message: "Review created successfully",
+        data: review,
+      };
+    } catch (error) {
+      throw error;
     }
-
-    // Create a new review
-    return await prisma.review.create({
-      data: {
-        userId,
-        eventId,
-        rating,
-        comment,
-      },
-    });
-  } catch (error) {
-    throw error;
   }
-};
-
+}

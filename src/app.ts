@@ -3,7 +3,6 @@ import express, { NextFunction, Request, Response } from "express";
 import accountRouter from "./routes/account.router";
 import authRouter from "./routes/auth.router";
 import eventRouter from "./routes/event.router";
-import "./lib/scheduler";
 import reviewRouter from "./routes/review.router";
 import rewardsRouter from "./routes/rewards.router";
 import transactionDummyRouter from "./routes/transaction-dummy.router";
@@ -11,6 +10,7 @@ import transactionRouter from "./routes/transaction.router";
 import userRouter from "./routes/user.router";
 import voucherRouter from "./routes/voucher.router";
 import "./scripts/pointsExpiryScheduler";
+import "./lib/scheduler";
 
 const app = express();
 
@@ -23,9 +23,9 @@ app.use("/account", accountRouter);
 app.use("/events", eventRouter);
 app.use("/vouchers", voucherRouter);
 app.use("/transactions", transactionRouter);
-app.use("/reviews", reviewRouter);
 app.use("/user", userRouter);
 app.use("/rewards", rewardsRouter);
+app.use("/reviews", reviewRouter);
 app.use("/transaction-dummy", transactionDummyRouter);
 
 // middleware error
