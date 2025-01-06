@@ -65,14 +65,17 @@ export const getTransactionsDataService = async (
 
     // Mengambil total data yang ada di database
     const totalTicketsSold = await prisma.transaction.aggregate({
+      where: { acceptedAt: { not: null } },
       _sum: { quantity: true },
     });
 
     const totalRevenue = await prisma.transaction.aggregate({
+      where: { acceptedAt: { not: null } },
       _sum: { totalPrice: true },
     });
 
     const totalEvents = await prisma.transaction.groupBy({
+      where: { acceptedAt: { not: null } },
       by: ["eventId"],
     });
 

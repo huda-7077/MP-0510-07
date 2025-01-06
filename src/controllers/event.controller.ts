@@ -1,10 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { createEventService } from "../services/event/create-event.service";
-import { getEventsService } from "../services/event/get-events.service";
-import { getEventService } from "../services/event/get-event.service";
 import { deleteEventService } from "../services/event/delete-event.service";
-import { getEventsByOrganizerIdService } from "../services/event/get-events-by-organizer-id.service";
 import { editEventService } from "../services/event/edit-event.service";
+import { getEventService } from "../services/event/get-event.service";
+import { getEventsService } from "../services/event/get-events.service";
 
 export const getEventsController = async (
   req: Request,
@@ -28,28 +27,6 @@ export const getEventsController = async (
   }
 };
 
-export const getEventsByOrganizerIdController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const query = {
-      take: parseInt(req.query.take as string) || 10,
-      page: parseInt(req.query.page as string) || 1,
-      sortBy: (req.query.sortBy as string) || "createdAt",
-      sortOrder: (req.query.sortOrder as string) || "desc",
-      search: (req.query.search as string) || "",
-    };
-    const results = await getEventsByOrganizerIdService(
-      res.locals.user.id,
-      query
-    );
-    res.status(200).send(results);
-  } catch (error) {
-    next(error);
-  }
-};
 export const getEventController = async (
   req: Request,
   res: Response,

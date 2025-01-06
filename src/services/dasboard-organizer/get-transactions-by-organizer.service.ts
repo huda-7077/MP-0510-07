@@ -1,9 +1,10 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, TransactionStatus } from "@prisma/client";
 import { PaginationQueryParams } from "../../types/pagination";
 import prisma from "../../lib/prisma";
 
 interface GetTransactionsQuery extends PaginationQueryParams {
   search: string;
+  status?: TransactionStatus;
 }
 
 export const getTransactionsByOrganizerIdService = async (
@@ -23,18 +24,18 @@ export const getTransactionsByOrganizerIdService = async (
       throw new Error("You are not an organizer");
     }
 
-    const { page, sortBy, sortOrder, take, search } = query;
+    const { page, sortBy, sortOrder, take, search, status } = query;
 
     const whereClause: Prisma.TransactionWhereInput = {
       event: { userId: userId },
+      ...(search && {
+        OR: [
+          { user: { email: { contains: search, mode: "insensitive" } } },
+          { event: { title: { contains: search, mode: "insensitive" } } },
+        ],
+      }),
+      ...(status && { status: status }),
     };
-
-    if (search) {
-      whereClause.OR = [
-        { user: { email: { contains: search, mode: "insensitive" } } },
-        { event: { title: { contains: search, mode: "insensitive" } } },
-      ];
-    }
 
     const transactions = await prisma.transaction.findMany({
       where: whereClause,
