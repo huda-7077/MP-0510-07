@@ -1,19 +1,17 @@
-import { Router } from "express";
-import {
+import { Router } from 'express';
+import { 
   createReviewController,
-  getReviewsController,
-} from "../controllers/review.controller";
-import { verifyToken } from "../lib/jwt";
-import { validateCreateReview } from "../validators/review.validator";
+  getEventReviewsController,
+  getUserReviewsController,
+  getReviewByIdController
+} from '../controllers/review.controller';
+import { verifyToken } from '../lib/jwt';
 
-const reviewRouter = Router();
+const router = Router();
 
-reviewRouter.post(
-  "/",
-  verifyToken,
-  validateCreateReview,
-  createReviewController
-);
-reviewRouter.get("/:eventId", getReviewsController);
+router.post('/', verifyToken, createReviewController);
+router.get('/event/:eventId', getEventReviewsController);
+router.get('/user',verifyToken, getUserReviewsController);
+router.get('/:reviewId', getReviewByIdController);
 
-export default reviewRouter;
+export default router;

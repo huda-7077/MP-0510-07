@@ -1,20 +1,30 @@
+// src/validators/review.validator.ts
 import { Request, Response, NextFunction } from "express";
-import { body, validationResult } from "express-validator";
 
-export const validateCreateReview = [
-  body("userId").notEmpty().withMessage("User ID is required").isInt(),
-  body("eventId").notEmpty().withMessage("Event ID is required").isInt(),
-  body("rating").notEmpty().withMessage("Rating is required").isInt({ min: 1, max: 5 }),
-  body("comment").notEmpty().withMessage("Comment is required").isString(),
+export const validateCreateReview = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { rating, comment } = req.body;
 
-  (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
+    if (!rating || typeof rating !== 'number' || rating < 1 || rating > 5) {
+      return res.status(400).json({
+        status: "error",
+        message: "Rating must be a number between 1 and 5"
+      });
+    }
 
-    if (!errors.isEmpty()) {
-      res.status(400).send({ message: errors.array()[0].msg });
-      return;
+    if (!comment || typeof comment !== 'string' || comment.trim() === '') {
+      return res.status(400).json({
+        status: "error",
+        message: "Comment is required and must be a non-empty string"
+      });
     }
 
     next();
-  },
-];
+  } catch (error) {
+    next(error);
+  }
+};
