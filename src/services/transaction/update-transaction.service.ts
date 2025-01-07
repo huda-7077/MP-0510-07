@@ -1,5 +1,6 @@
 import { TransactionStatus } from "@prisma/client";
 import prisma from "../../lib/prisma";
+import { sendTransactionEmail } from "../../lib/handlebars";
 
 interface UpdateTransactionsBody {
   transactionId: number;
@@ -81,6 +82,14 @@ export const updateTransactionService = async (
 
     let result;
 
+    const existingUser = await prisma.user.findFirst({
+      where: { id: transaction?.userId },
+    });
+
+    if (!existingUser) {
+      throw new Error("Can't find user to send email");
+    }
+
     if (isRejected) {
       result = await prisma.$transaction(async (prisma) => {
         await prisma.transaction.update({
@@ -110,6 +119,21 @@ export const updateTransactionService = async (
           data: { totalPoints: { increment: transaction?.pointsUsed } },
         });
 
+        const totalPriceBeforeDiscount =
+          Number(transaction.quantity) * Number(event.price);
+        const totalDiscount =
+          totalPriceBeforeDiscount - Number(transaction?.totalPrice);
+
+        await sendTransactionEmail({
+          email: existingUser?.email,
+          name: existingUser?.fullname,
+          transactionStatus: "Rejected",
+          ticketQuantity: String(Math.round(transaction?.quantity)),
+          totalDiscount: totalDiscount.toFixed(2),
+          total: Number(transaction?.totalPrice).toFixed(2),
+          totalPrice: totalPriceBeforeDiscount.toFixed(2),
+        });
+
         return {
           message: "Transaction rejected",
         };
@@ -124,6 +148,21 @@ export const updateTransactionService = async (
             status: TransactionStatus.DONE,
             acceptedAt: new Date(),
           },
+        });
+
+        const totalPriceBeforeDiscount =
+          Number(transaction.quantity) * Number(event.price);
+        const totalDiscount =
+          totalPriceBeforeDiscount - Number(transaction?.totalPrice);
+
+        await sendTransactionEmail({
+          email: existingUser?.email,
+          name: existingUser?.fullname,
+          transactionStatus: "Accepted",
+          ticketQuantity: String(Math.round(transaction?.quantity)),
+          totalDiscount: totalDiscount.toFixed(2),
+          total: Number(transaction?.totalPrice).toFixed(2),
+          totalPrice: totalPriceBeforeDiscount.toFixed(2),
         });
 
         return {
