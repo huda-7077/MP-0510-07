@@ -20,10 +20,15 @@ export const getUserListsService = async (query: GetUserListsQuery) => {
       organizerApproved,
     } = query;
 
+    // const whereClause: Prisma.UserWhereInput = {
+    //   isDeleted: false,
+    // };
+
     const whereClause: Prisma.UserWhereInput = {
       isDeleted: false,
     };
 
+    // Tambahkan kondisi pencarian
     if (search) {
       whereClause.OR = [
         { fullname: { contains: search, mode: "insensitive" } },
@@ -38,6 +43,8 @@ export const getUserListsService = async (query: GetUserListsQuery) => {
       ];
     }
 
+    whereClause.AND = whereClause.AND || [];
+    // Dapatkan userId dari organizerAccepted dan organizerRequest
     const organizerAccepted = await prisma.organizer.findMany({
       where: { acceptedAt: { not: null } },
       select: { userId: true },
@@ -47,18 +54,23 @@ export const getUserListsService = async (query: GetUserListsQuery) => {
       where: { acceptedAt: null },
       select: { userId: true },
     });
+
     const acceptedUserIds = organizerAccepted.map((org) => org.userId);
     const pendingUserIds = organizerRequest.map((org) => org.userId);
 
+    // Tambahkan kondisi untuk organizerApproved dan organizerPending
     if (organizerApproved && organizerPending) {
-      whereClause.OR = [
-        { id: { in: acceptedUserIds } },
-        { id: { in: pendingUserIds } },
-      ];
+      whereClause.AND = {
+        OR: [{ id: { in: acceptedUserIds } }, { id: { in: pendingUserIds } }],
+      };
     } else if (organizerApproved) {
-      whereClause.OR = [{ id: { in: acceptedUserIds } }];
+      whereClause.AND = {
+        id: { in: acceptedUserIds },
+      };
     } else if (organizerPending) {
-      whereClause.OR = [{ id: { in: pendingUserIds } }];
+      whereClause.AND = {
+        id: { in: pendingUserIds },
+      };
     }
 
     const users = await prisma.user.findMany({
