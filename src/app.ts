@@ -8,6 +8,7 @@ import rewardsRouter from "./routes/rewards.router";
 import transactionRouter from "./routes/transaction.router";
 import userRouter from "./routes/user.router";
 import voucherRouter from "./routes/voucher.router";
+import dashboardAdminRouter from "./routes/dashboard-admin.router";
 import dashboardOrganizerRouter from "./routes/dashboard-organizer.router";
 import "./scripts/pointsExpiryScheduler";
 import "./lib/scheduler";
@@ -26,6 +27,7 @@ app.use("/transactions", transactionRouter);
 app.use("/user", userRouter);
 app.use("/rewards", rewardsRouter);
 app.use("/reviews", reviewRouter);
+app.use("/dashboard-admin", dashboardAdminRouter);
 app.use("/dashboard-organizer", dashboardOrganizerRouter);
 
 // middleware error
