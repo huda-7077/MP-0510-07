@@ -4,6 +4,7 @@ import {
   createTransactionController,
   getTransactionController,
   PaymentProofController,
+  updateTransactionController,
 } from "../controllers/transaction.controller";
 import { uploader } from "../lib/multer";
 import { fileFilter } from "../lib/fileFilter";
@@ -19,5 +20,6 @@ router.patch(
   fileFilter,
   PaymentProofController
 );
+router.patch("/update", verifyToken, updateTransactionController);
 
 export default router;

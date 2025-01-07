@@ -5,7 +5,6 @@ import authRouter from "./routes/auth.router";
 import eventRouter from "./routes/event.router";
 import reviewRouter from "./routes/review.router";
 import rewardsRouter from "./routes/rewards.router";
-import transactionDummyRouter from "./routes/transaction-dummy.router";
 import transactionRouter from "./routes/transaction.router";
 import userRouter from "./routes/user.router";
 import voucherRouter from "./routes/voucher.router";
@@ -27,7 +26,6 @@ app.use("/transactions", transactionRouter);
 app.use("/user", userRouter);
 app.use("/rewards", rewardsRouter);
 app.use("/reviews", reviewRouter);
-app.use("/transaction-dummy", transactionDummyRouter);
 app.use("/dashboard-organizer", dashboardOrganizerRouter);
 
 // middleware error

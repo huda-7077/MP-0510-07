@@ -1,14 +1,15 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, TransactionStatus } from "@prisma/client";
 import { PaginationQueryParams } from "../../types/pagination";
 import prisma from "../../lib/prisma";
 
-interface GetTransactionsQuery extends PaginationQueryParams {
+interface GetAttendeeQuery extends PaginationQueryParams {
   search: string;
 }
 
-export const getTransactionsByOrganizerIdService = async (
+export const getAttendeesByEventIdService = async (
+  eventId: number,
   userId: number,
-  query: GetTransactionsQuery
+  query: GetAttendeeQuery
 ) => {
   try {
     const user = await prisma.user.findFirst({
@@ -23,18 +24,27 @@ export const getTransactionsByOrganizerIdService = async (
       throw new Error("You are not an organizer");
     }
 
+    const event = await prisma.event.findFirst({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      throw new Error("Invalid event id");
+    }
+
+    if (event.userId !== userId) {
+      throw new Error("You are not authorized to view this event");
+    }
+
     const { page, sortBy, sortOrder, take, search } = query;
 
     const whereClause: Prisma.TransactionWhereInput = {
-      event: { userId: userId },
+      event: { id: eventId },
+      status: { in: [TransactionStatus.DONE] },
+      ...(search && {
+        OR: [{ user: { email: { contains: search, mode: "insensitive" } } }],
+      }),
     };
-
-    if (search) {
-      whereClause.OR = [
-        { user: { email: { contains: search, mode: "insensitive" } } },
-        { event: { title: { contains: search, mode: "insensitive" } } },
-      ];
-    }
 
     const transactions = await prisma.transaction.findMany({
       where: whereClause,
@@ -43,16 +53,18 @@ export const getTransactionsByOrganizerIdService = async (
       orderBy: {
         [sortBy]: sortOrder,
       },
-      include: {
+      select: {
+        id: true,
         user: {
           select: {
             fullname: true,
             email: true,
           },
         },
+        status: true,
         event: { select: { title: true } },
-        voucher: { select: { discountValue: true } },
-        coupon: { select: { discountValue: true } },
+        quantity: true,
+        totalPrice: true,
       },
     });
 

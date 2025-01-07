@@ -4,7 +4,6 @@ import {
   deleteEventController,
   editEventController,
   getEventController,
-  getEventsByOrganizerIdController,
   getEventsController,
 } from "../controllers/event.controller";
 import { fileFilter } from "../lib/fileFilter";
@@ -15,7 +14,6 @@ import { validateCreateEvent } from "../validators/event.validator";
 const eventRouter = Router();
 
 eventRouter.get("/", getEventsController);
-eventRouter.get("/event-lists", verifyToken, getEventsByOrganizerIdController);
 eventRouter.get("/:id", getEventController);
 eventRouter.post(
   "/",
