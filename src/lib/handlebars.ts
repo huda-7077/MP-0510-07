@@ -1,7 +1,6 @@
 import handlebars from "handlebars";
-import fs from "fs";
-import path from "path";
 import { transporter } from "./nodemailer";
+import { notificationTransactionTemplate } from "../templates/NotificationTransaction";
 
 export const sendTransactionEmail = async (data: {
   email: string;
@@ -22,15 +21,7 @@ export const sendTransactionEmail = async (data: {
     total,
   } = data;
 
-  const templatePath = path.join(
-    __dirname,
-    "..",
-    "templates",
-    "NotificationTransaction.hbs"
-  );
-
-  const source = fs.readFileSync(templatePath, "utf8");
-  const template = handlebars.compile(source);
+  const template = handlebars.compile(notificationTransactionTemplate);
 
   const html = template({
     email,
