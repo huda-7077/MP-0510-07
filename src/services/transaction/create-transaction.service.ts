@@ -22,12 +22,10 @@ export async function createTransaction({
   paymentProof,
 }: CreateTransactionParams) {
   return await prisma.$transaction(async (tx) => {
-    // Validasi quantity
     if (quantity <= 0) {
       throw new Error("Jumlah tiket harus lebih dari 0");
     }
 
-    // Cek event
     const event = await tx.event.findUnique({
       where: { id: eventId },
     });
@@ -35,17 +33,14 @@ export async function createTransaction({
       throw new Error("Event tidak ditemukan");
     }
 
-    // Validasi tanggal event
     if (event.endDate < new Date()) {
       throw new Error("Event sudah berakhir");
     }
 
-    // Validasi ketersediaan kursi
     if (event.avaliableSeats < quantity) {
       throw new Error(`Hanya tersedia ${event.avaliableSeats} kursi`);
     }
 
-    // Cek dan validasi user serta points
     const user = await tx.user.findUnique({
       where: { id: userId },
     });
@@ -53,25 +48,21 @@ export async function createTransaction({
       throw new Error("User tidak ditemukan");
     }
 
-    // Validasi penggunaan voucher dan kupon bersamaan
     if (voucherCode && couponCode) {
       throw new Error("Tidak dapat menggunakan voucher dan kupon sekaligus");
     }
 
-    // Cek dan validasi points
     if (pointsUsed) {
       if (user.totalPoints < pointsUsed) {
         throw new Error("Poin tidak mencukupi");
       }
       
-      // Maksimum penggunaan poin (50% dari total harga)
       const maxPointsUsage = Math.floor(event.price * quantity * 0.5);
       if (pointsUsed > maxPointsUsage) {
         throw new Error(`Maksimum penggunaan poin adalah ${maxPointsUsage} poin`);
       }
     }
 
-    // Cek dan validasi kupon
     let coupon = null;
     if (couponCode) {
       coupon = await tx.coupon.findFirst({
@@ -79,7 +70,7 @@ export async function createTransaction({
           code: couponCode,
           isUsed: false,
           expiresAt: { gte: new Date() },
-          userId: userId, // Memastikan kupon milik user yang bersangkutan
+          userId: userId, 
         },
       });
       if (!coupon) {
@@ -87,13 +78,12 @@ export async function createTransaction({
       }
     }
 
-    // Cek dan validasi voucher
     let voucher = null;
     if (voucherCode) {
       voucher = await tx.voucher.findFirst({
         where: {
           code: voucherCode,
-          eventId: eventId, // Memastikan voucher untuk event yang sama
+          eventId: eventId, 
           startDate: { lte: new Date() },
           endDate: { gte: new Date() },
         },
@@ -103,10 +93,8 @@ export async function createTransaction({
       }
     }
 
-    // Kalkulasi total harga
     let totalPrice = event.price * quantity;
 
-    // Terapkan diskon
     if (pointsUsed) {
       totalPrice -= pointsUsed;
     }
@@ -117,12 +105,10 @@ export async function createTransaction({
       totalPrice -= coupon.discountValue;
     }
 
-    // Validasi total harga
     if (totalPrice < 0) {
       throw new Error("Total harga tidak boleh kurang dari 0");
     }
 
-    // Buat transaksi
     const transaction = await tx.transaction.create({
       data: {
         userId,
@@ -138,7 +124,6 @@ export async function createTransaction({
       },
     });
 
-    // Update ketersediaan kursi
     await tx.event.update({
       where: { id: eventId },
       data: { 
@@ -148,7 +133,6 @@ export async function createTransaction({
       },
     });
 
-    // Update poin user jika digunakan
     if (pointsUsed) {
       await tx.user.update({
         where: { id: userId },
@@ -160,7 +144,6 @@ export async function createTransaction({
       });
     }
 
-    // Update status kupon jika digunakan
     if (coupon) {
       await tx.coupon.update({
         where: { id: coupon.id },

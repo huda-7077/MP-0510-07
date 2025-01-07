@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 interface UploadPaymentProofBody {
   transactionId: number;
-  paymentProof: any; // or a more specific type if you know it, e.g., Express.Multer.File
+  paymentProof: any; 
 }
 
 export const PaymentProofService = async ({
@@ -17,14 +17,12 @@ export const PaymentProofService = async ({
   }
 
   try {
-    // Upload file to Cloudinary
     const { secure_url } = await cloudinaryUpload(paymentProof);
 
     if (!secure_url) {
       throw new Error("Failed to upload payment proof to Cloudinary.");
     }
 
-    // Ensure the transaction with the given ID exists
     const transaction = await prisma.transaction.findUnique({
       where: { id: transactionId },
       include: { user: true, event: true },
@@ -34,12 +32,10 @@ export const PaymentProofService = async ({
       throw new Error(`Transaction with ID ${transactionId} not found.`);
     }
 
-    // Validate transaction status
     if (transaction.status !== TransactionStatus.WAITING_FOR_PAYMENT) {
       throw new Error("Only transactions waiting for payment can upload payment proof.");
     }
 
-    // Update transaction with payment proof URL
     const updatedTransaction = await prisma.transaction.update({
       where: { id: transactionId },
       data: {
