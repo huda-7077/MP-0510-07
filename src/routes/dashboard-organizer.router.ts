@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  getAttendeesByEventIdController,
   getEventsByOrganizerIdController,
   getTransactionsByOrganizerIdController,
   getTransactionsDataController,
@@ -15,5 +16,6 @@ router.get(
   getTransactionsByOrganizerIdController
 );
 router.get("/event-lists", verifyToken, getEventsByOrganizerIdController);
+router.get("/attendees/:id", verifyToken, getAttendeesByEventIdController);
 
 export default router;
