@@ -12,10 +12,7 @@ export const createTransactionController = async (
   next: NextFunction
 ) => {
   try {
-    // Get userId from res.locals.user (set by auth middleware)
     const userIdFromToken = res.locals.user.id;
-
-    // Get other fields from the request body
     const {
       eventId,
       quantity,
@@ -24,8 +21,6 @@ export const createTransactionController = async (
       couponCode,
       paymentProof,
     } = req.body;
-
-    // Call createTransaction service with verified userId
     const result = await createTransaction({
       userId: userIdFromToken,
       eventId,
@@ -65,7 +60,6 @@ export const PaymentProofController = async (
     const proofFile = req.file as Express.Multer.File;
     const transactionId = Number(req.params.id);
 
-    // Input validation
     if (!transactionId || isNaN(transactionId)) {
       res.status(400).json({ error: "Invalid transaction ID." });
       return;
@@ -76,7 +70,6 @@ export const PaymentProofController = async (
       return;
     }
 
-    // Call service to update transaction
     const updatedTransaction = await PaymentProofService({
       transactionId,
       paymentProof: proofFile,
