@@ -3,6 +3,7 @@ import { createTransaction } from "../services/transaction/create-transaction.se
 import { getTransactionService } from "../services/transaction/get-transaction.service";
 import { PaymentProofService } from "../services/transaction/payment-proof.service";
 import { PrismaClient } from "@prisma/client";
+import { updateTransactionService } from "../services/transaction/update-transaction.service";
 
 const prisma = new PrismaClient();
 
@@ -91,3 +92,15 @@ export const PaymentProofController = async (
   }
 };
 
+export const updateTransactionController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await updateTransactionService(res.locals.user.id, req.body);
+    res.status(200).send(result);
+  } catch (error) {
+    next(error);
+  }
+};
