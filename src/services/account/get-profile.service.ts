@@ -10,9 +10,13 @@ export const getProfileService = async (userId: number) => {
       throw new Error("Invalid user id");
     }
 
+    const coupon = await prisma.coupon.findFirst({
+      where: { userId },
+    });
+
     const { password: pass, ...userWithoutPassword } = user;
 
-    return { ...userWithoutPassword };
+    return { ...userWithoutPassword, coupon };
   } catch (error) {
     throw error;
   }
